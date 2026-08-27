@@ -91,21 +91,21 @@ class ChartScreen extends ConsumerWidget {
            Text(market.error!, style: const TextStyle(color: AppTheme.gold, fontSize: 12)),
          ],
          const SizedBox(height: 14),
-         Card(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Wrap(
-              spacing: 18,
-              runSpacing: 12,
-              children: [
-                 const _Indicator(label: 'EMA 9', color: AppTheme.gold, value: '—'),
-                 const _Indicator(label: 'EMA 21', color: Colors.lightBlue, value: '—'),
-                 const _Indicator(label: 'RSI 14', color: AppTheme.green, value: '—'),
-                 const _Indicator(label: 'ATR 14', color: AppTheme.red, value: '—'),
-              ],
+          const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Wrap(
+                spacing: 18,
+                runSpacing: 12,
+                children: [
+                  _Indicator(label: 'EMA 9', color: AppTheme.gold, value: '—'),
+                  _Indicator(label: 'EMA 21', color: Colors.lightBlue, value: '—'),
+                  _Indicator(label: 'RSI 14', color: AppTheme.green, value: '—'),
+                  _Indicator(label: 'ATR 14', color: AppTheme.red, value: '—'),
+                ],
+              ),
             ),
           ),
-        ),
       ],
     );
   }
