@@ -66,11 +66,11 @@ class ChartScreen extends ConsumerWidget {
         const SizedBox(height: 14),
         const Card(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16),
             child: Wrap(
               spacing: 18,
               runSpacing: 12,
-              children: const [
+              children: [
                 _Indicator(label: 'EMA 9', color: AppTheme.gold, value: '2341.86'),
                 _Indicator(label: 'EMA 21', color: Colors.lightBlue, value: '2339.54'),
                 _Indicator(label: 'RSI 14', color: AppTheme.green, value: '57.2'),

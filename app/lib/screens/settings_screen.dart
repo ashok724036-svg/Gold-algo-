@@ -19,14 +19,14 @@ class SettingsScreen extends ConsumerWidget {
         const Card(
           child: Column(
             children: [
-              const ListTile(
+              ListTile(
                 leading: Icon(Icons.account_balance_wallet_outlined, color: AppTheme.gold),
                 title: Text('Paper account'),
                 subtitle: Text('\$10,000 initial balance · USD'),
                 trailing: Icon(Icons.chevron_right),
               ),
-              const Divider(height: 1),
-              const ListTile(
+              Divider(height: 1),
+              ListTile(
                 leading: Icon(Icons.security_outlined, color: AppTheme.green),
                 title: Text('Risk controls'),
                 subtitle: Text('1.0% risk · 3 max open trades · 1.0 max lot'),
