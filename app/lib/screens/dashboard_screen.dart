@@ -32,7 +32,7 @@ class DashboardScreen extends ConsumerWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 7),
               decoration: BoxDecoration(
-                color: AppTheme.green.withValues(alpha: .12),
+                color: AppTheme.green.withOpacity(.12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Row(children: [
@@ -79,7 +79,7 @@ class DashboardScreen extends ConsumerWidget {
                             FlSpot(3, 10114), FlSpot(4, 10102), FlSpot(5, 10176),
                             FlSpot(6, 10184),
                           ],
-                          belowBarData: BarAreaData(show: true, color: AppTheme.gold.withValues(alpha: .10)),
+                          belowBarData: BarAreaData(show: true, color: AppTheme.gold.withOpacity(.10)),
                         ),
                       ],
                     ),
@@ -116,7 +116,7 @@ class DashboardScreen extends ConsumerWidget {
         ...positions.map((position) => Card(
               child: ListTile(
                 leading: CircleAvatar(
-                  backgroundColor: AppTheme.green.withValues(alpha: .14),
+                  backgroundColor: AppTheme.green.withOpacity(.14),
                   child: const Icon(Icons.arrow_upward_rounded, color: AppTheme.green),
                 ),
                 title: Text(position.bot),

@@ -25,7 +25,7 @@ class AppTheme {
         error: red,
       ),
       scaffoldBackgroundColor: surface,
-      cardTheme: const CardThemeData(
+      cardTheme: const CardTheme(
         color: panel,
         margin: EdgeInsets.zero,
         elevation: 0,
@@ -40,7 +40,7 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: panel,
-        indicatorColor: gold.withValues(alpha: .18),
+        indicatorColor: gold.withOpacity(.18),
         labelTextStyle: WidgetStateProperty.all(
           const TextStyle(fontWeight: FontWeight.w600),
         ),

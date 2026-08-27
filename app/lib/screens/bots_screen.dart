@@ -37,7 +37,7 @@ class BotsScreen extends ConsumerWidget {
         const Text('Run custom Python or JSON strategies in paper mode.', style: TextStyle(color: AppTheme.muted)),
         const SizedBox(height: 20),
         Card(
-          color: AppTheme.gold.withValues(alpha: .10),
+          color: AppTheme.gold.withOpacity(.10),
           child: const Padding(
             padding: EdgeInsets.all(16),
             child: Row(
@@ -56,7 +56,7 @@ class BotsScreen extends ConsumerWidget {
                 value: bot.active,
                 onChanged: (_) => ref.read(botsProvider.notifier).toggle(bot.id),
                 secondary: CircleAvatar(
-                  backgroundColor: bot.active ? AppTheme.green.withValues(alpha: .14) : AppTheme.surface,
+                  backgroundColor: bot.active ? AppTheme.green.withOpacity(.14) : AppTheme.surface,
                   child: Icon(bot.active ? Icons.bolt_rounded : Icons.smart_toy_outlined, color: bot.active ? AppTheme.green : AppTheme.muted),
                 ),
                 title: Text(bot.name),

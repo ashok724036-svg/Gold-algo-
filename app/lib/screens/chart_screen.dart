@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/theme.dart';
+import '../models/trading_models.dart';
 import '../providers/trading_provider.dart';
 
 class ChartScreen extends ConsumerWidget {
@@ -108,7 +109,7 @@ class _CandlePainter extends CustomPainter {
     final chart = Rect.fromLTWH(18, 34, size.width - 36, size.height - 75);
     final maxPrice = candles.map((c) => c.high).reduce((a, b) => a > b ? a : b);
     final minPrice = candles.map((c) => c.low).reduce((a, b) => a < b ? a : b);
-    final range = maxPrice - minPrice;
+    final range = (maxPrice - minPrice).abs() < 0.000001 ? 1 : maxPrice - minPrice;
     final candleWidth = chart.width / candles.length * .62;
     final line = Paint()..strokeWidth = 1;
     for (var i = 0; i < candles.length; i++) {
@@ -121,7 +122,7 @@ class _CandlePainter extends CustomPainter {
       final body = Rect.fromLTRB(x - candleWidth / 2, y(up ? candle.close : candle.open), x + candleWidth / 2, y(up ? candle.open : candle.close));
       canvas.drawRect(body, line..style = PaintingStyle.fill);
     }
-    final grid = Paint()..color = AppTheme.muted.withValues(alpha: .12)..strokeWidth = 1;
+    final grid = Paint()..color = AppTheme.muted.withOpacity(.12)..strokeWidth = 1;
     for (var i = 0; i < 4; i++) {
       final y = chart.top + chart.height * i / 3;
       canvas.drawLine(Offset(chart.left, y), Offset(chart.right, y), grid);
