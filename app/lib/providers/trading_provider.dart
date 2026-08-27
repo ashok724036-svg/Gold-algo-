@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/trading_models.dart';
+import '../services/market_data_service.dart';
 
 final selectedNavProvider = StateProvider<int>((ref) => 0);
 final selectedTimeframeProvider = StateProvider<String>((ref) => 'M1');
@@ -22,7 +24,154 @@ final botsProvider =
   return BotsController();
 });
 
-final candlesProvider = Provider<List<Candle>>((ref) {
+final candlesProvider =
+    StateNotifierProvider<CandlesController, CandlesState>((ref) {
+  final controller = CandlesController();
+  ref.onDispose(controller.dispose);
+  return controller;
+});
+
+class CandlesState {
+  const CandlesState({
+    required this.timeframe,
+    required this.candles,
+    this.loading = false,
+    this.live = false,
+    this.error,
+    this.lastUpdated,
+  });
+
+  factory CandlesState.initial() => const CandlesState(
+        timeframe: 'M1',
+        candles: [],
+        loading: true,
+      );
+
+  final String timeframe;
+  final List<Candle> candles;
+  final bool loading;
+  final bool live;
+  final String? error;
+  final DateTime? lastUpdated;
+}
+
+class CandlesController extends StateNotifier<CandlesState> {
+  CandlesController() : super(CandlesState.initial()) {
+    _service.onCandle = _handleRealtimeCandle;
+    unawaited(load('M1'));
+  }
+
+  final MarketDataService _service = MarketDataService();
+  Timer? _refreshTimer;
+  int _loadGeneration = 0;
+
+  Future<void> load(String timeframe) async {
+    final generation = ++_loadGeneration;
+    final apiTimeframe = _apiTimeframe(timeframe);
+    _refreshTimer?.cancel();
+    state = CandlesState(
+      timeframe: timeframe,
+      candles: state.timeframe == timeframe ? state.candles : const [],
+      loading: true,
+      live: state.live,
+      lastUpdated: state.lastUpdated,
+    );
+
+    String? refreshWarning;
+    if (_service.isConfigured) {
+      try {
+        await _service.refreshLiveCandle();
+      } catch (_) {
+        refreshWarning = 'Live refresh is not available yet.';
+      }
+    }
+
+    try {
+      final result = await _service.load(apiTimeframe);
+      if (generation != _loadGeneration) return;
+      state = CandlesState(
+        timeframe: timeframe,
+        candles: result.candles,
+        loading: false,
+        live: _service.isConfigured && !result.fromCache,
+        error: result.warning ?? refreshWarning,
+        lastUpdated: result.candles.isEmpty ? null : DateTime.now(),
+      );
+      if (_service.isConfigured) _startRefreshTimer();
+    } catch (_) {
+      state = CandlesState(
+        timeframe: timeframe,
+        candles: const [],
+        loading: false,
+        live: false,
+        error: 'Could not load candles. Apply the Supabase migration first.',
+      );
+    }
+  }
+
+  void _startRefreshTimer() {
+    _refreshTimer = Timer.periodic(const Duration(minutes: 1), (_) async {
+      final timeframe = state.timeframe;
+      try {
+        await _service.refreshLiveCandle();
+        final result = await _service.load(_apiTimeframe(timeframe));
+        if (timeframe != state.timeframe) return;
+        state = CandlesState(
+          timeframe: state.timeframe,
+          candles: result.candles,
+          loading: false,
+          live: !result.fromCache,
+          error: result.warning,
+          lastUpdated: result.candles.isEmpty ? state.lastUpdated : DateTime.now(),
+        );
+      } catch (_) {
+        state = CandlesState(
+          timeframe: state.timeframe,
+          candles: state.candles,
+          loading: false,
+          live: false,
+          error: 'Live refresh failed. Retrying in one minute.',
+          lastUpdated: state.lastUpdated,
+        );
+      }
+    });
+  }
+
+  void _handleRealtimeCandle(MarketCandleEvent event) {
+    if (event.timeframe != _apiTimeframe(state.timeframe)) return;
+    final candles = [
+      ...state.candles.where((item) => item.time != event.candle.time),
+      event.candle,
+    ]..sort((a, b) => a.time.compareTo(b.time));
+    state = CandlesState(
+      timeframe: state.timeframe,
+      candles: candles.length > 200 ? candles.sublist(candles.length - 200) : candles,
+      loading: false,
+      live: true,
+      lastUpdated: DateTime.now(),
+    );
+  }
+
+  String _apiTimeframe(String label) {
+    return switch (label) {
+      'M1' => '1m',
+      'M5' => '5m',
+      'M15' => '15m',
+      'M30' => '30m',
+      'H1' => '1h',
+      _ => '1m',
+    };
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    unawaited(_service.dispose());
+    super.dispose();
+  }
+}
+
+final demoCandlesProvider = Provider<List<Candle>>((ref) {
   final random = Random(7);
   var price = 2342.6;
   return List.generate(54, (index) {

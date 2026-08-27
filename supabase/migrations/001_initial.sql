@@ -36,7 +36,8 @@ create table if not exists public.bots (
   parameters jsonb not null default '{}'::jsonb,
   magic_number integer not null,
   created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
+  updated_at timestamptz not null default now(),
+  unique (user_id, magic_number)
 );
 
 create table if not exists public.paper_accounts (
@@ -91,6 +92,7 @@ create table if not exists public.user_settings (
 create index if not exists idx_candles_symbol_time on public.candles(symbol, timeframe, timestamp desc);
 create index if not exists idx_trades_user_status on public.paper_trades(user_id, status);
 create index if not exists idx_bots_active on public.bots(is_active) where is_active = true;
+create unique index if not exists idx_bots_user_magic on public.bots(user_id, magic_number);
 
 alter table public.profiles enable row level security;
 alter table public.candles enable row level security;
@@ -100,14 +102,21 @@ alter table public.paper_trades enable row level security;
 alter table public.bot_logs enable row level security;
 alter table public.user_settings enable row level security;
 
+drop policy if exists "profiles are own rows" on public.profiles;
 create policy "profiles are own rows" on public.profiles for all using (id = auth.uid()) with check (id = auth.uid());
+drop policy if exists "candles are public read" on public.candles;
 create policy "candles are public read" on public.candles for select using (true);
+drop policy if exists "bots are own rows" on public.bots;
 create policy "bots are own rows" on public.bots for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "accounts are own rows" on public.paper_accounts;
 create policy "accounts are own rows" on public.paper_accounts for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "trades are own rows" on public.paper_trades;
 create policy "trades are own rows" on public.paper_trades for all using (user_id = auth.uid()) with check (user_id = auth.uid());
+drop policy if exists "logs are own rows" on public.bot_logs;
 create policy "logs are own rows" on public.bot_logs for select using (
   exists (select 1 from public.bots b where b.id = bot_id and b.user_id = auth.uid())
 );
+drop policy if exists "settings are own rows" on public.user_settings;
 create policy "settings are own rows" on public.user_settings for all using (user_id = auth.uid()) with check (user_id = auth.uid());
 
 create or replace function public.handle_new_user()

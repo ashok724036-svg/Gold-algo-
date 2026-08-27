@@ -5,7 +5,7 @@ Deno.serve(async () => {
   const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
   if (!url || !key) return Response.json({ error: 'Supabase environment is incomplete' }, { status: 500 });
   const headers = { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
-  const latest = await fetch(`${url}/rest/v1/candles?select=*&timeframe=eq.1m&order=timestamp.desc&limit=360`, { headers });
+  const latest = await fetch(`${url}/rest/v1/candles?select=*&symbol=eq.XAU%2FUSD&timeframe=eq.1m&order=timestamp.desc&limit=360`, { headers });
   if (!latest.ok) return Response.json({ error: await latest.text() }, { status: 502 });
   const candles = await latest.json() as Array<{ timestamp: string; open: number; high: number; low: number; close: number; volume: number; symbol: string }>;
   const writes: unknown[] = [];

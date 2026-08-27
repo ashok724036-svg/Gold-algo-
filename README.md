@@ -20,21 +20,25 @@ broker, place orders, or handle real money.
 
 ## $0 deployment guide
 
-1. Create a free Supabase project and run `supabase/migrations/001_initial.sql`
-   in the SQL editor, then run `supabase/seed.sql` after creating the first
-   user.
+1. Create a free Supabase project and run
+   `supabase/migrations/001_initial.sql` in the SQL editor. This migration is
+   safe to run again. Create the first user, then run `supabase/seed.sql`.
 2. Install the Supabase CLI, run `supabase login`, link the project, and deploy:
    `supabase functions deploy fetch-xau-candles`,
    `supabase functions deploy aggregate-timeframes`, and
    `supabase functions deploy run-active-bots`.
-3. Configure the service role secret and `DUKASCOPY_PROXY_URL` as Supabase
+3. Configure `SUPABASE_SERVICE_ROLE_KEY` and `TWELVEDATA_API_KEY` as Supabase
    function secrets. Keep service-role and data-provider keys out of Flutter.
+   `TWELVEDATA_KEYS` may be used instead when rotating multiple keys.
 4. Deploy the optional backtest worker with `fly launch --region bom` from
    `engine/`, then set `DUKASCOPY_PROXY_URL` to its URL.
 5. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` as GitHub Actions secrets. A
    signing keystore is optional: if `ANDROID_KEYSTORE_BASE64` is absent, CI
    creates a debug keystore so the APK build still completes.
-6. Run the mobile app with the two `--dart-define` values from `app/`.
+6. Run the mobile app with the two `--dart-define` values from `app/`. The
+   Markets screen invokes `fetch-xau-candles` on open and once per minute, then
+   listens to Supabase Realtime for candle inserts/updates. The `candles` table
+   must be in the `supabase_realtime` publication.
 
 Supabase cron jobs call the ingestion loop once per minute and retention
 deletes only M1 candles older than 30 days. Aggregated M5/M15/M30/H1 candles

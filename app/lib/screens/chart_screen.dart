@@ -11,8 +11,12 @@ class ChartScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final timeframe = ref.watch(selectedTimeframeProvider);
-    final candles = ref.watch(candlesProvider);
-    final last = candles.last.close;
+    ref.listen<String>(selectedTimeframeProvider, (_, next) {
+      ref.read(candlesProvider.notifier).load(next);
+    });
+    final market = ref.watch(candlesProvider);
+    final candles = market.candles;
+    final last = candles.isEmpty ? null : candles.last.close;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 20, 20, 28),
       children: [
@@ -27,7 +31,7 @@ class ChartScreen extends ConsumerWidget {
                 ],
               ),
             ),
-            Text(last.toStringAsFixed(2), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.gold)),
+            Text(last == null ? '—' : last.toStringAsFixed(2), style: Theme.of(context).textTheme.titleLarge?.copyWith(color: AppTheme.gold)),
           ],
         ),
         const SizedBox(height: 20),
@@ -51,30 +55,53 @@ class ChartScreen extends ConsumerWidget {
         Card(
           child: SizedBox(
             height: 390,
-            child: CustomPaint(
-              painter: _CandlePainter(candles),
-              child: const Padding(
-                padding: EdgeInsets.all(18),
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: Text('LIVE  ·  1m', style: TextStyle(color: AppTheme.green, fontSize: 11, fontWeight: FontWeight.bold)),
+             child: Stack(
+               children: [
+                 if (candles.isNotEmpty)
+                   CustomPaint(
+                     size: Size.infinite,
+                     painter: _CandlePainter(candles),
+                   )
+                 else
+                   Center(
+                     child: market.loading
+                         ? const CircularProgressIndicator(color: AppTheme.gold)
+                         : const Text('No candle data available', style: TextStyle(color: AppTheme.muted)),
                 ),
-              ),
+                 Padding(
+                   padding: const EdgeInsets.all(18),
+                   child: Align(
+                     alignment: Alignment.topLeft,
+                     child: Text(
+                       market.live ? 'LIVE  ·  ${timeframe.toLowerCase()}' : 'OFFLINE  ·  ${timeframe.toLowerCase()}',
+                       style: TextStyle(
+                         color: market.live ? AppTheme.green : AppTheme.gold,
+                         fontSize: 11,
+                         fontWeight: FontWeight.bold,
+                       ),
+                     ),
+                   ),
+                 ),
+               ],
             ),
           ),
         ),
-        const SizedBox(height: 14),
-        const Card(
+         if (market.error != null) ...[
+           const SizedBox(height: 10),
+           Text(market.error!, style: const TextStyle(color: AppTheme.gold, fontSize: 12)),
+         ],
+         const SizedBox(height: 14),
+         Card(
           child: Padding(
             padding: EdgeInsets.all(16),
             child: Wrap(
               spacing: 18,
               runSpacing: 12,
               children: [
-                _Indicator(label: 'EMA 9', color: AppTheme.gold, value: '2341.86'),
-                _Indicator(label: 'EMA 21', color: Colors.lightBlue, value: '2339.54'),
-                _Indicator(label: 'RSI 14', color: AppTheme.green, value: '57.2'),
-                _Indicator(label: 'ATR 14', color: AppTheme.red, value: '2.84'),
+                 _Indicator(label: 'EMA 9', color: AppTheme.gold, value: '—'),
+                 _Indicator(label: 'EMA 21', color: Colors.lightBlue, value: '—'),
+                 _Indicator(label: 'RSI 14', color: AppTheme.green, value: '—'),
+                 _Indicator(label: 'ATR 14', color: AppTheme.red, value: '—'),
               ],
             ),
           ),
