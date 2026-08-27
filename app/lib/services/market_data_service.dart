@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drift/drift.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/config.dart';
@@ -141,7 +142,7 @@ class MarketDataService {
           high: candle.high,
           low: candle.low,
           close: candle.close,
-          volume: candle.volume,
+          volume: Value(candle.volume),
         ),
       ),
     );
