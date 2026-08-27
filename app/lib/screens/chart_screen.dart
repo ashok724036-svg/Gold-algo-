@@ -64,7 +64,7 @@ class ChartScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 14),
-        Card(
+        const Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Wrap(

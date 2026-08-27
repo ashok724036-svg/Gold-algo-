@@ -8,7 +8,7 @@ class AppConfig {
     const anonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
     if (url.isEmpty || anonKey.isEmpty) return;
 
-    await Supabase.initialize(url: url, anonKey: anonKey);
+    await Supabase.initialize(url: url, publishableKey: anonKey);
     isSupabaseConfigured = true;
   }
 

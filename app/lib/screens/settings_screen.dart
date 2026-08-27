@@ -16,7 +16,7 @@ class SettingsScreen extends ConsumerWidget {
       children: [
         Text('Settings', style: Theme.of(context).textTheme.headlineSmall),
         const SizedBox(height: 20),
-        Card(
+        const Card(
           child: Column(
             children: [
               const ListTile(
