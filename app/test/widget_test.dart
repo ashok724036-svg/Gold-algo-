@@ -8,6 +8,6 @@ void main() {
       const ProviderScope(child: GoldScalperApp()),
     );
     await tester.pumpAndSettle();
-    expect(find.text('GoldScalper Pro'), findsOneWidget);
+    expect(find.text('Good morning, trader'), findsOneWidget);
   });
 }
