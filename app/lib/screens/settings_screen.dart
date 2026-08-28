@@ -60,11 +60,11 @@ class SettingsScreen extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 16),
-        Card(
+        const Card(
           child: ListTile(
-            leading: const Icon(Icons.cloud_done_outlined, color: AppTheme.green),
-            title: const Text('Live market data'),
-            subtitle: const Text('XAU/USD candles sync automatically from Supabase'),
+            leading: Icon(Icons.cloud_done_outlined, color: AppTheme.green),
+            title: Text('Live market data'),
+            subtitle: Text('XAU/USD candles sync automatically from Supabase'),
           ),
         ),
         const SizedBox(height: 22),
