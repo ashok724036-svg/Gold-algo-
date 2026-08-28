@@ -32,7 +32,9 @@ broker, place orders, or handle real money.
    `TWELVEDATA_KEYS` may be used instead when rotating multiple keys.
 4. Deploy the optional backtest worker with `fly launch --region bom` from
    `engine/`, then set `DUKASCOPY_PROXY_URL` to its URL.
-5. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` as GitHub Actions secrets. A
+5. Add `SUPABASE_URL` and `SUPABASE_ANON_KEY` as GitHub Actions secrets. The
+   mobile app opens directly without an email/password screen; no Supabase
+   Auth login is required for the public market-data flow. A
    signing keystore is optional: if `ANDROID_KEYSTORE_BASE64` is absent, CI
    creates a debug keystore so the APK build still completes.
 6. Run the mobile app with the two `--dart-define` values from `app/`. The

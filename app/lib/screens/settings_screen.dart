@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/config.dart';
 import '../core/theme.dart';
 import '../providers/trading_provider.dart';
 
@@ -63,12 +62,9 @@ class SettingsScreen extends ConsumerWidget {
         const SizedBox(height: 16),
         Card(
           child: ListTile(
-            leading: const Icon(Icons.logout_rounded, color: AppTheme.red),
-            title: const Text('Sign out'),
-            onTap: () async {
-              await AppConfig.supabase?.auth.signOut();
-              if (context.mounted) Navigator.of(context).pop();
-            },
+            leading: const Icon(Icons.cloud_done_outlined, color: AppTheme.green),
+            title: const Text('Live market data'),
+            subtitle: const Text('XAU/USD candles sync automatically from Supabase'),
           ),
         ),
         const SizedBox(height: 22),

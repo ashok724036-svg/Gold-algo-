@@ -36,6 +36,25 @@ jobs:
           fi
       - name: Generate Android project files
         run: flutter create --platforms=android --project-name goldscalper_pro .
+      - name: Optimize Android release
+        working-directory: .
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          path = Path("app/android/app/build.gradle")
+          source = path.read_text()
+          optimized = re.sub(
+              r"(buildTypes\s*\{\s*release\s*\{)",
+              r"\1\n            minifyEnabled true\n            shrinkResources true",
+              source,
+              count=1,
+          )
+          if optimized == source:
+              raise SystemExit("Could not find the generated Android release block")
+          path.write_text(optimized)
+          PY
       - name: Resolve dependencies
         run: flutter pub get
       - name: Generate Drift database code
@@ -43,15 +62,34 @@ jobs:
       - name: Analyze and test
         run: flutter analyze && flutter test
       - name: Build APK
-        run: flutter build apk --release --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/symbols --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }} --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+      - name: Verify APK sizes
+        working-directory: .
+        run: |
+          set -eu
+          found=0
+          for apk in app/build/app/outputs/flutter-apk/app-*-release.apk; do
+            found=1
+            bytes=$(stat -c%s "$apk")
+            mib=$((bytes / 1024 / 1024))
+            echo "$apk: ${bytes} bytes (${mib} MiB)"
+            if [ "$bytes" -ge 10485760 ]; then
+              echo "APK is not below 10 MiB: $apk"
+              exit 1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "No split APKs were produced"
+            exit 1
+          fi
       - name: Publish APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: goldscalper-pro-apk
-          path: app/build/app/outputs/flutter-apk/app-release.apk
+          path: app/build/app/outputs/flutter-apk/app-*-release.apk
       - name: Create GitHub release
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: build-${{ github.run_number }}
-          files: app/build/app/outputs/flutter-apk/app-release.apk
+          files: app/build/app/outputs/flutter-apk/app-*-release.apk

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/config.dart';
 import 'core/theme.dart';
 import 'providers/trading_provider.dart';
-import 'screens/auth_screen.dart';
 import 'screens/backtest_screen.dart';
 import 'screens/bots_screen.dart';
 import 'screens/chart_screen.dart';
@@ -20,9 +18,7 @@ class GoldScalperApp extends ConsumerWidget {
       title: 'GoldScalper Pro',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.dark(),
-      home: AppConfig.supabase?.auth.currentSession == null
-          ? const AuthScreen()
-          : const ShellScreen(),
+      home: const ShellScreen(),
     );
   }
 }
